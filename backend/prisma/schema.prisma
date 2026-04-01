@@ -1,0 +1,53 @@
+generator client {
+  provider        = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  userName  String   @unique
+  password  String
+  name      String?
+  email     String?
+  boards    Board[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Board {
+  id        String   @id @default(uuid())
+  title     String
+  lists     List[]
+  userId    String?  // THÊM DẤU ? ĐỂ TẠM THỜI VƯỢT LỖI
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model List {
+  id        String   @id @default(uuid())
+  title     String
+  position  Int      @default(0)
+  boardId   String
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  cards     Card[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Card {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  coverImage  String?
+  position    Int      @default(0)
+  isDone      Boolean  @default(false) // THÊM DÒNG NÀY ĐỂ ĐÁNH DẤU HOÀN THÀNH
+  listId      String
+  list        List     @relation(fields: [listId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

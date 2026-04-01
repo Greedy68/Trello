@@ -1,0 +1,3 @@
+[01:11:39.540] Server  ERROR   Error: ENOENT: no such file or directory, scandir '/Users/greedy/Dev/test/trello-clone/app'
+[01:11:39.544] Server  ERROR   ⨯ "unhandledRejection:" Error: ENOENT: no such file or directory, scandir '/Users/greedy/Dev/test/trello-clone/app'
+[01:11:39.545] Server  ERROR   ⨯ "unhandledRejection: " Error: ENOENT: no such file or directory, scandir '/Users/greedy/Dev/test/trello-clone/app'
