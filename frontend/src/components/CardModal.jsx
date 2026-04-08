@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogTitle, TextField, Button, Box, Typography, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import api from '../api';
+import api from '../pages/api';
 
 export default function CardModal({ open, onClose, card, onUpdate }) {
   // 1. Khởi tạo state cục bộ để người dùng nhập liệu
@@ -19,7 +19,6 @@ export default function CardModal({ open, onClose, card, onUpdate }) {
   // 3. Hàm xử lý khi nhấn Lưu
   const handleSave = async () => {
     try {
-      // Gọi Service API mà anh em mình đã đóng gói ở api.js
       await api.card.update(card.id, { title, description });
       onUpdate(); // Gọi hàm của Board để load lại dữ liệu mới nhất
       onClose();  // Đóng Modal
@@ -37,19 +36,19 @@ export default function CardModal({ open, onClose, card, onUpdate }) {
 
       <DialogContent>
         <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
-          <TextField 
-            label="Tiêu đề" 
-            fullWidth 
-            value={title} 
-            onChange={(e) => setTitle(e.target.value)} 
+          <TextField
+            label="Tiêu đề"
+            fullWidth
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
           />
-          <TextField 
-            label="Mô tả chi tiết" 
-            fullWidth 
-            multiline 
-            rows={4} 
-            value={description} 
-            onChange={(e) => setDescription(e.target.value)} 
+          <TextField
+            label="Mô tả chi tiết"
+            fullWidth
+            multiline
+            rows={4}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
             placeholder="Thêm mô tả ở đây..."
           />
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, pb: 2 }}>

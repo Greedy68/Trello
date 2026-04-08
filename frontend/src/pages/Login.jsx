@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Box, Paper, TextField, Button, Typography, Container, Link } from '@mui/material';
-import api from '../api'; // API dùng chung mới
+import api from './api';
 import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
-    const [isLogin, setIsLogin] = useState(true); 
+    const [isLogin, setIsLogin] = useState(true);
     const [formData, setFormData] = useState({ userName: '', password: '', name: '', email: '' });
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -12,10 +12,8 @@ export default function Login() {
     const handleAction = async () => {
         setError('');
         try {
-            // MỚI: Gọi trực tiếp Service bạn muốn theo trạng thái isLogin
-            // Rất trực quan: "api.auth.login(...)" hoặc "api.auth.register(...)"
-            const res = isLogin 
-                ? await api.auth.login(formData) 
+            const res = isLogin
+                ? await api.auth.login(formData)
                 : await api.auth.register(formData);
 
             if (isLogin) {
@@ -41,7 +39,7 @@ export default function Login() {
                         {!isLogin && (
                             <TextField label="Họ tên" variant="outlined" fullWidth
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
-                            )}
+                        )}
                         <TextField label="Tên đăng nhập" variant="outlined" fullWidth
                             onChange={(e) => setFormData({ ...formData, userName: e.target.value })} />
                         <TextField label="Mật khẩu" type="password" variant="outlined" fullWidth

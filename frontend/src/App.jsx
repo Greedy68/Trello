@@ -5,14 +5,14 @@ import Home from './pages/Home';
 import MainLayout from './components/MainLayout';
 import { CssBaseline } from '@mui/material';
 
-// --- BẢO VỆ ĐƯỜNG DẪN CỰC MẠNH ---
+// --- BẢO VỆ ĐƯỜNG DẪN ---
 const ProtectedRoute = ({ children }) => {
     const token = localStorage.getItem('token');
     if (!token) {
         // Nếu không có Token -> Thẳng về Login
         return <Navigate to="/login" replace />;
     }
-    // Ở đây anh bao bọc Layout cho mọi trang bên trong 
+    // Bao bọc Layout cho mọi trang bên trong 
     return <MainLayout>{children}</MainLayout>;
 };
 

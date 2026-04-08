@@ -10,6 +10,3 @@ dist/
 frontend/dist/
 frontend/.env
 
-# --- KẾ HOẠCH NỘI BỘ (KHÔNG PUSH) ---
-implementation_plan.md
-*plan*.md

@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, CircularProgress, Button, TextField } from '@mui/material';
-import api from '../api'; 
+import api from './api';
 import List from '../components/List';
 import CardModal from '../components/CardModal';
 
 import {
-  DndContext, 
+  DndContext,
   closestCorners,
   PointerSensor,
   useSensor,
@@ -25,14 +25,10 @@ export default function Board() {
   const [editingCard, setEditingCard] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Cấu hình Cảm biến kéo thả: Khoảng cách di chuyển > 5px mới tính là bắt đầu kéo (Tránh click nhầm)
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
 
-  /**
-   * Hàm FetchBoard: Lấy toàn bộ thông tin Bảng bao gồm danh sách List và Card bên trong
-   */
   const fetchBoard = async () => {
     try {
       const res = await api.board.getById(id);
@@ -40,19 +36,12 @@ export default function Board() {
     } catch (error) { console.error("Lỗi fetch board:", error); }
   };
 
-  /**
-   * Hàm findListId: Tìm xem một ID (có thể là cardID) đang thuộc về Cột (List) nào
-   * Phục vụ cho việc kéo thả chéo cột
-   */
   const findListId = (id) => {
     if (board.lists.find(l => l.id === id)) return id;
     const list = board.lists.find(l => l.cards.some(c => c.id === id));
     return list ? list.id : null;
   };
 
-  /**
-   * Xử lý khi bắt đầu kéo: Lưu lại thông tin thẻ đang kéo để hiển thị "Bóng ma" (DragOverlay)
-   */
   const handleDragStart = (event) => {
     const { active } = event;
     const list = board.lists.find(l => l.cards.some(c => c.id === active.id));
@@ -60,9 +49,6 @@ export default function Board() {
     setActiveCard(card);
   };
 
-  /**
-   * Xử lý khi đang kéo (Hàng không/Hàng dưới): Cập nhật State ảo giúp người dùng thấy thẻ bay qua lại mượt mà
-   */
   const handleDragOver = (event) => {
     const { active, over } = event;
     if (!over) return;
@@ -70,8 +56,7 @@ export default function Board() {
     const overId = over.id;
     const activeContainer = findListId(activeId);
     const overContainer = findListId(overId);
-    
-    // Nếu kéo chéo cột, ta phải hoán đổi thẻ giữa 2 mảng List trong State
+
     if (!activeContainer || !overContainer || activeContainer === overContainer) return;
 
     setBoard(prev => {
@@ -88,9 +73,6 @@ export default function Board() {
     });
   };
 
-  /**
-   * Xử lý khi kết thúc kéo: Lưu vị trí mới vào Database
-   */
   const handleDragEnd = async (event) => {
     const { active, over } = event;
     if (!over) { setActiveCard(null); return; }
@@ -99,40 +81,34 @@ export default function Board() {
     const activeContainer = findListId(activeId);
     const overContainer = findListId(overId);
 
-    // Kéo thả sắp xếp lại trong cùng 1 cột
     if (activeContainer === overContainer) {
-        const activeList = board.lists.find(l => l.id === activeContainer);
-        const oldIndex = activeList.cards.findIndex(c => c.id === activeId);
-        const newIndex = activeList.cards.findIndex(c => c.id === overId);
-        if (oldIndex !== newIndex) {
-            setBoard(prev => ({
-                ...prev,
-                lists: prev.lists.map(l => l.id === activeContainer 
-                    ? { ...l, cards: arrayMove(l.cards, oldIndex, newIndex) } 
-                    : l
-                )
-            }));
-        }
+      const activeList = board.lists.find(l => l.id === activeContainer);
+      const oldIndex = activeList.cards.findIndex(c => c.id === activeId);
+      const newIndex = activeList.cards.findIndex(c => c.id === overId);
+      if (oldIndex !== newIndex) {
+        setBoard(prev => ({
+          ...prev,
+          lists: prev.lists.map(l => l.id === activeContainer
+            ? { ...l, cards: arrayMove(l.cards, oldIndex, newIndex) }
+            : l
+          )
+        }));
+      }
     }
 
-    // PERSISTENCE: Gọi API lưu vào DB
     try {
-        await api.card.update(activeId, { listId: overContainer });
-    } catch (err) { 
-        console.error(err); 
-        fetchBoard(); // ROLLBACK: Nếu lỗi API thì tải lại dữ liệu thật từ Server
+      await api.card.update(activeId, { listId: overContainer });
+    } catch (err) {
+      console.error(err);
+      fetchBoard();
     }
 
     setActiveCard(null);
   };
 
-  // Mở/Đóng Modal chi tiết card
   const handleCardClick = (card) => { setEditingCard(card); setIsModalOpen(true); };
   const handleModalClose = () => { setIsModalOpen(false); setEditingCard(null); };
 
-  /**
-   * Thêm Cột (List) mới
-   */
   const handleAddList = async () => {
     if (!newListTitle) return;
     try {
@@ -155,19 +131,16 @@ export default function Board() {
   return (
     <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
       <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: 'transparent', overflow: 'hidden' }}>
-        
-        {/* HEADER CỦA BOARD */}
+
         <Box sx={{ p: 2, display: 'flex', alignItems: 'center', bgcolor: '#0747a6', color: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
           <Typography variant="h6" fontWeight="bold">{board.title}</Typography>
         </Box>
 
-        {/* VÙNG CHỨA CÁC CỘT (LISTS) */}
         <Box sx={{ p: 2, flexGrow: 1, overflowX: 'auto', display: 'flex', alignItems: 'flex-start', gap: 2 }}>
           {board.lists.map(list => (
             <List key={list.id} list={list} onUpdate={fetchBoard} onCardClick={handleCardClick} />
           ))}
 
-          {/* Ô THÊM CỘT MỚI (DẠNG DỰ QUYỀN) */}
           {isAddingList ? (
             <Box sx={{ minWidth: 272, p: 1, borderRadius: 1 }} className="glass-list">
               <TextField fullWidth size="small" autoFocus placeholder="Tiêu đề danh sách..." value={newListTitle} onChange={(e) => setNewListTitle(e.target.value)} sx={{ bgcolor: 'white', mb: 1 }} />
@@ -188,7 +161,6 @@ export default function Board() {
         <CardModal open={isModalOpen} onClose={handleModalClose} card={editingCard} onUpdate={fetchBoard} />
       </Box>
 
-      {/* HIỆU ỨNG THẺ BAY KHI ĐANG KÉO (DRAG OVERLAY) */}
       <DragOverlay>
         {activeCard ? (
           <Box sx={{ p: 1.5, bgcolor: 'white', borderRadius: 1, boxShadow: 10, width: 256, opacity: 0.9, cursor: 'grabbing' }}>
