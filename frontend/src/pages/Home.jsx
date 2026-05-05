@@ -4,16 +4,24 @@ import { Box, Typography, Container, Paper, TextField, Button } from '@mui/mater
 import api from './api';
 import AddIcon from '@mui/icons-material/Add';
 
+
 export default function Home() {
     const [newBoardTitle, setNewBoardTitle] = useState('');
     const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem('user') || '{}');
 
+
     const handleCreateBoard = async () => {
         if (!newBoardTitle) return;
         try {
+
             const res = await api.board.create({ title: newBoardTitle });
+
+
             navigate(`/boards/${res.data.id}`);
+
+
+
         } catch (err) { console.error("Lỗi tạo bảng:", err); }
     };
 
@@ -30,6 +38,7 @@ export default function Home() {
                     elevation={6}
                     sx={{ p: 4, textAlign: 'center', borderRadius: 4, className: 'glass-list' }}
                 >
+
                     <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ color: '#172b4d' }}>
                         Chào mừng, {user.name}! 👋
                     </Typography>
@@ -38,6 +47,7 @@ export default function Home() {
                         Hãy chọn một bảng ở thanh bên trái hoặc tạo một bảng mới ngay bên dưới để bắt đầu công việc.
                     </Typography>
 
+
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                         <TextField
                             fullWidth
@@ -45,7 +55,7 @@ export default function Home() {
                             value={newBoardTitle}
                             onChange={(e) => setNewBoardTitle(e.target.value)}
                             sx={{ bgcolor: 'white', borderRadius: 2 }}
-                            onKeyPress={(e) => e.key === 'Enter' && handleCreateBoard()} 
+                            onKeyPress={(e) => e.key === 'Enter' && handleCreateBoard()}
                         />
                         <Button
                             variant="contained"

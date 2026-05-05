@@ -4,6 +4,10 @@ import { Box, Typography, CircularProgress, Button, TextField } from '@mui/mater
 import api from './api';
 import List from '../components/List';
 import CardModal from '../components/CardModal';
+import io from 'socket.io-client';
+
+
+const socket = io('http://localhost:5002', { autoConnect: false });
 
 import {
   DndContext,
@@ -25,9 +29,11 @@ export default function Board() {
   const [editingCard, setEditingCard] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
+
 
   const fetchBoard = async () => {
     try {
@@ -36,11 +42,13 @@ export default function Board() {
     } catch (error) { console.error("Lỗi fetch board:", error); }
   };
 
+
   const findListId = (id) => {
     if (board.lists.find(l => l.id === id)) return id;
     const list = board.lists.find(l => l.cards.some(c => c.id === id));
     return list ? list.id : null;
   };
+
 
   const handleDragStart = (event) => {
     const { active } = event;
@@ -49,6 +57,7 @@ export default function Board() {
     setActiveCard(card);
   };
 
+
   const handleDragOver = (event) => {
     const { active, over } = event;
     if (!over) return;
@@ -56,6 +65,7 @@ export default function Board() {
     const overId = over.id;
     const activeContainer = findListId(activeId);
     const overContainer = findListId(overId);
+
 
     if (!activeContainer || !overContainer || activeContainer === overContainer) return;
 
@@ -73,6 +83,7 @@ export default function Board() {
     });
   };
 
+
   const handleDragEnd = async (event) => {
     const { active, over } = event;
     if (!over) { setActiveCard(null); return; }
@@ -81,33 +92,54 @@ export default function Board() {
     const activeContainer = findListId(activeId);
     const overContainer = findListId(overId);
 
+
+    let newPosition = 0;
+
+
     if (activeContainer === overContainer) {
       const activeList = board.lists.find(l => l.id === activeContainer);
       const oldIndex = activeList.cards.findIndex(c => c.id === activeId);
-      const newIndex = activeList.cards.findIndex(c => c.id === overId);
-      if (oldIndex !== newIndex) {
+      newPosition = activeList.cards.findIndex(c => c.id === overId);
+
+      if (oldIndex !== newPosition) {
         setBoard(prev => ({
           ...prev,
           lists: prev.lists.map(l => l.id === activeContainer
-            ? { ...l, cards: arrayMove(l.cards, oldIndex, newIndex) }
+            ? { ...l, cards: arrayMove(l.cards, oldIndex, newPosition) }
             : l
           )
         }));
       }
+    } else {
+
+
+      const overList = board.lists.find(l => l.id === overContainer);
+      const targetIndex = overList.cards.findIndex(c => c.id === overId);
+
+
+      newPosition = targetIndex >= 0 ? targetIndex : overList.cards.length;
     }
 
+
     try {
-      await api.card.update(activeId, { listId: overContainer });
+      await api.card.reorder(activeId, {
+        sourceListId: activeContainer,
+        destinationListId: overContainer,
+        newPosition
+      });
     } catch (err) {
-      console.error(err);
+      console.error("Lỗi kéo thả API Reorder:", err);
+
       fetchBoard();
     }
 
     setActiveCard(null);
   };
 
+
   const handleCardClick = (card) => { setEditingCard(card); setIsModalOpen(true); };
   const handleModalClose = () => { setIsModalOpen(false); setEditingCard(null); };
+
 
   const handleAddList = async () => {
     if (!newListTitle) return;
@@ -119,7 +151,77 @@ export default function Board() {
     } catch (err) { console.error(err); }
   };
 
-  useEffect(() => { fetchBoard(); }, [id]);
+  useEffect(() => {
+    fetchBoard();
+
+
+    socket.connect();
+    socket.emit('join_board', id);
+
+    socket.on('board_change', (response) => {
+      console.log('📡 Nhận tín hiệu Socket:', response);
+      const { action, payload } = response;
+
+      switch(action) {
+        case 'LIST_CREATED':
+
+          setBoard(prev => {
+            if (!prev) return prev;
+
+            if (prev.lists.find(l => l.id === payload.id)) return prev;
+            return { ...prev, lists: [...prev.lists, payload] };
+          });
+          break;
+
+        case 'CARD_CREATED':
+
+          setBoard(prev => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              lists: prev.lists.map(list => {
+                if (list.id === payload.listId) {
+
+                  if (list.cards.find(c => c.id === payload.id)) return list;
+                  return { ...list, cards: [...list.cards, payload] };
+                }
+                return list;
+              })
+            };
+          });
+          break;
+
+        case 'CARD_UPDATED':
+
+          setBoard(prev => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              lists: prev.lists.map(list =>
+                list.id === payload.listId
+                  ? {
+                      ...list,
+                      cards: list.cards.map(card => card.id === payload.id ? { ...card, ...payload } : card)
+                    }
+                  : list
+              )
+            };
+          });
+          break;
+
+        case 'REORDER':
+        default:
+          fetchBoard();
+          break;
+      }
+    });
+
+
+    return () => {
+      socket.off('board_change');
+      socket.disconnect();
+    };
+  }, [id]);
 
   if (!board) return (
     <Box sx={{ p: 4, textAlign: 'center' }}>
@@ -132,14 +234,17 @@ export default function Board() {
     <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
       <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: 'transparent', overflow: 'hidden' }}>
 
+
         <Box sx={{ p: 2, display: 'flex', alignItems: 'center', bgcolor: '#0747a6', color: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
           <Typography variant="h6" fontWeight="bold">{board.title}</Typography>
         </Box>
+
 
         <Box sx={{ p: 2, flexGrow: 1, overflowX: 'auto', display: 'flex', alignItems: 'flex-start', gap: 2 }}>
           {board.lists.map(list => (
             <List key={list.id} list={list} onUpdate={fetchBoard} onCardClick={handleCardClick} />
           ))}
+
 
           {isAddingList ? (
             <Box sx={{ minWidth: 272, p: 1, borderRadius: 1 }} className="glass-list">
@@ -160,6 +265,7 @@ export default function Board() {
 
         <CardModal open={isModalOpen} onClose={handleModalClose} card={editingCard} onUpdate={fetchBoard} />
       </Box>
+
 
       <DragOverlay>
         {activeCard ? (

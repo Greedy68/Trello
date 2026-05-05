@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Box, Typography, Button, Avatar, Menu, MenuItem, Divider, CircularProgress } from '@mui/material';
 import api from '../pages/api';
 
+
 const Sidebar = () => {
     const [boards, setBoards] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -10,6 +11,7 @@ const Sidebar = () => {
     const navigate = useNavigate();
     const { id: activeBoardId } = useParams();
     const user = JSON.parse(localStorage.getItem('user') || '{}');
+
 
     const fetchBoards = async () => {
         try {
@@ -19,10 +21,13 @@ const Sidebar = () => {
         finally { setLoading(false); }
     };
 
+
     useEffect(() => { fetchBoards(); }, [activeBoardId]);
+
 
     const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
     const handleMenuClose = () => setAnchorEl(null);
+
 
     const handleLogout = () => {
         localStorage.clear();
@@ -39,6 +44,7 @@ const Sidebar = () => {
             borderRight: '1px solid rgba(255,255,255,0.1)',
             flexShrink: 0
         }}>
+
             <Box
                 onClick={handleMenuOpen}
                 sx={{
@@ -53,12 +59,14 @@ const Sidebar = () => {
                 <Typography variant="body2" sx={{ opacity: 0.5 }}>▼</Typography>
             </Box>
 
+
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
                 <MenuItem onClick={handleLogout}>Đăng xuất tài khoản</MenuItem>
                 <MenuItem onClick={() => { handleMenuClose(); navigate('/'); }}>Trang chủ</MenuItem>
             </Menu>
 
             <Divider sx={{ bgcolor: 'rgba(255,255,255,0.1)' }} />
+
 
             <Box sx={{ p: 2, flexGrow: 1, overflowY: 'auto' }}>
                 <Typography variant="overline" sx={{ color: 'rgba(255,255,255,0.5)', mb: 2, display: 'block' }}>BẢNG CỦA TÔI</Typography>
@@ -72,6 +80,7 @@ const Sidebar = () => {
                                 justifyContent: 'flex-start',
                                 textAlign: 'left',
                                 textTransform: 'none',
+
                                 color: activeBoardId === board.id ? 'white' : 'rgba(255,255,255,0.7)',
                                 bgcolor: activeBoardId === board.id ? 'rgba(0, 121, 191, 0.4)' : 'transparent',
                                 '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' },
@@ -85,6 +94,7 @@ const Sidebar = () => {
                             # {board.title}
                         </Button>
                     ))}
+
 
                     <Button
                         onClick={() => navigate('/')}

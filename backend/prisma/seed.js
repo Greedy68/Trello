@@ -15,7 +15,7 @@ async function main() {
           {
             title: "Hướng dẫn cho người mới dùng Trello",
             position: 1,
-            color: "#6c4fb2", 
+            color: "#6c4fb2",
             cards: {
               create: [
                 {
@@ -37,7 +37,7 @@ async function main() {
           {
             title: "Hôm nay",
             position: 2,
-            color: "#8c6e1c", 
+            color: "#8c6e1c",
             cards: {
               create: [{ title: "Bắt đầu sử dụng Trello ✅", position: 1 }],
             },
@@ -45,7 +45,7 @@ async function main() {
           {
             title: "Tuần này",
             position: 3,
-            color: "#2a5a3a", 
+            color: "#2a5a3a",
             cards: {
               create: [],
             },
@@ -53,7 +53,7 @@ async function main() {
           {
             title: "Sau này",
             position: 4,
-            color: "#1e1f21", 
+            color: "#1e1f21",
             cards: {
               create: [],
             },

@@ -6,15 +6,19 @@ import SortableCard from './SortableCard';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useDroppable } from '@dnd-kit/core';
 
+
 export default function List({ list, onUpdate, onCardClick }) {
   const [isAddingCard, setIsAddingCard] = useState(false);
   const [newCardTitle, setNewListTitle] = useState('');
 
+
   const { setNodeRef } = useDroppable({ id: list.id });
+
 
   const handleAddCard = async () => {
     if (!newCardTitle) return;
     try {
+
       await api.card.create({
         title: newCardTitle,
         listId: list.id,
@@ -25,6 +29,7 @@ export default function List({ list, onUpdate, onCardClick }) {
       onUpdate();
     } catch (err) { console.error('Lỗi thêm thẻ:', err); }
   };
+
 
   const handleDeleteList = async () => {
     if (window.confirm(`Xóa danh sách: ${list.title}?`)) {
@@ -49,6 +54,7 @@ export default function List({ list, onUpdate, onCardClick }) {
         borderRadius: '12px'
       }}
     >
+
       <Box sx={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -66,12 +72,15 @@ export default function List({ list, onUpdate, onCardClick }) {
         </IconButton>
       </Box>
 
+
       <SortableContext items={list.cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
+
 
         <Box sx={{ flexGrow: 1, overflowY: 'auto', p: 1, minHeight: 100 }}>
           {list.cards.map(card => (
             <SortableCard key={card.id} card={card} onClick={onCardClick} onUpdate={onUpdate} />
           ))}
+
 
           {isAddingCard ? (
             <Box sx={{ px: 0.5 }}>

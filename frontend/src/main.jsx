@@ -5,7 +5,7 @@ import './index.css';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 
-// Tạo theme MUI cơ bản
+
 const theme = createTheme({
   palette: {
     primary: { main: '#0079bf' },

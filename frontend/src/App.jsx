@@ -5,14 +5,14 @@ import Home from './pages/Home';
 import MainLayout from './components/MainLayout';
 import { CssBaseline } from '@mui/material';
 
-// --- BẢO VỆ ĐƯỜNG DẪN ---
+
 const ProtectedRoute = ({ children }) => {
     const token = localStorage.getItem('token');
     if (!token) {
-        // Nếu không có Token -> Thẳng về Login
+
         return <Navigate to="/login" replace />;
     }
-    // Bao bọc Layout cho mọi trang bên trong 
+
     return <MainLayout>{children}</MainLayout>;
 };
 
@@ -23,8 +23,8 @@ function App() {
             <BrowserRouter>
                 <Routes>
                     <Route path="/login" element={<Login />} />
-                    
-                    {/* TOÀN BỘ TRANG BÊN DƯỚI ĐỀU SẼ CÓ SIDEBAR VÀ ĐƯỢC BẢO VỆ */}
+
+
                     <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
                     <Route path="/boards/:id" element={<ProtectedRoute><Board /></ProtectedRoute>} />
                 </Routes>

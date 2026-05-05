@@ -5,10 +5,13 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import api from '../pages/api';
 
+
 export default function SortableCard({ card, onClick, onUpdate }) {
+
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card.id
   });
+
 
   const style = {
     transform: CSS.Translate.toString(transform),
@@ -18,10 +21,14 @@ export default function SortableCard({ card, onClick, onUpdate }) {
     cursor: 'pointer'
   };
 
+
   const handleToggleDone = async (e) => {
+
     e.stopPropagation();
     try {
+
       await api.card.update(card.id, { isDone: !card.isDone });
+
 
       if (onUpdate) onUpdate();
     } catch (err) { console.error("Lỗi cập nhật trạng thái thẻ:", err); }
@@ -45,6 +52,7 @@ export default function SortableCard({ card, onClick, onUpdate }) {
         borderRadius: '8px'
       }}
     >
+
       <Box
         onClick={(e) => {
           e.stopPropagation();
@@ -70,6 +78,7 @@ export default function SortableCard({ card, onClick, onUpdate }) {
         sx={{
           flexGrow: 1,
           color: card.isDone ? '#999' : '#172b4d',
+
           textDecoration: card.isDone ? 'line-through' : 'none',
           fontWeight: card.isDone ? 'normal' : '500'
         }}

@@ -3,10 +3,13 @@ node_modules/
 **/node_modules/
 .DS_Store
 .env
+.agents/
 *.local
 dist/
+
 
 # --- FRONTEND ---
 frontend/dist/
 frontend/.env
 
+*.md

@@ -4,11 +4,11 @@ import CloseIcon from '@mui/icons-material/Close';
 import api from '../pages/api';
 
 export default function CardModal({ open, onClose, card, onUpdate }) {
-  // 1. Khởi tạo state cục bộ để người dùng nhập liệu
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
 
-  // 2. Mỗi khi "card" truyền từ Board thay đổi, mình phải cập nhật lại state ở đây
+
   useEffect(() => {
     if (card) {
       setTitle(card.title || '');
@@ -16,12 +16,12 @@ export default function CardModal({ open, onClose, card, onUpdate }) {
     }
   }, [card]);
 
-  // 3. Hàm xử lý khi nhấn Lưu
+
   const handleSave = async () => {
     try {
       await api.card.update(card.id, { title, description });
-      onUpdate(); // Gọi hàm của Board để load lại dữ liệu mới nhất
-      onClose();  // Đóng Modal
+      onUpdate();
+      onClose();
     } catch (err) {
       console.error('Lỗi cập nhật thẻ:', err);
     }
